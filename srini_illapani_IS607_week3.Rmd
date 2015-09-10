@@ -1,0 +1,60 @@
+---
+title: "IS607 - Week3"
+author: "Srini Illapani"
+date: "September 9, 2015"
+output: html_document
+---
+
+####1. For this assignment, I downloaded the Pittsburgh bridges dataset from
+https://archive.ics.uci.edu/ml/datasets/Pittsburgh+Bridges.
+Uploaded the file to my github repository and used the curl package to retrieve the dataset from my repository.
+
+```{r, eval = TRUE}
+library(curl)
+bridges <- read.csv(curl("https://raw.githubusercontent.com/isrini/SI_IS607/master/bridges.data.version1"), header = FALSE)
+head(bridges)
+
+```
+
+
+####2. The data set includes 108 rows and 13 columns. It does not have the headers to describe the columns.
+Lets add the column names or headers to the data set using the following code and then displaying the data using a function from knitr package.
+
+```{r, eval=TRUE}
+colnames(bridges) <- c("identifier", "river", "location", "erected","purpose", "length", "lanes", "clear-g", "T_or_D", "material", "span", "rel_l", "type")
+
+rownames(bridges) <- NULL
+library(knitr)
+kable(head(bridges, 20))
+```
+
+
+####3. Data transformation:
+To transform column 'river' data to their full abbreviation values, the below function is being used.
+
+```{r, eval=TRUE}
+bridges$river <- ifelse(bridges$river=="A", "Allegheny", 
+              ifelse(bridges$river=="M", "Monongahela",
+              ifelse(bridges$river=="O", "Ohio", "N/A")
+                     
+))
+
+```
+
+
+####4. Data transformation:
+To transform column 'purpose' data for 'RR' to its full abbreviation, the below code is being used.
+
+```{r, eval=TRUE}
+
+bridges$purpose <- gsub("RR", "RAILROAD", bridges$purpose)
+       
+```
+
+
+####5. View the transformed data
+
+```{r, eval=TRUE}
+kable(head(bridges, 20))
+```
+
