@@ -1,0 +1,120 @@
+---
+title: "IS607_Week4"
+author: "Srini Illapani"
+date: "September 17, 2015"
+output: html_document
+---
+
+## Week 4 Assignement - Regular Expressions
+
+
+###4. Describe the types of strings that confirm to the following regular experessions and construct an example that is matched by the regular expression.
+
+### a.
+```{r eval = TRUE}
+library(stringr)
+string1 <- c("190050$",
+           "54$",
+           "1$.25 cents",
+           "abcd$")
+
+str_extract(string1, "[0-9]+\\$")
+```
+
+###b.
+```{r eval = TRUE}
+string1 <- c("abcd",
+           "do i know you",
+           "where are you?",
+           "DO I Know You",
+           "3 keys",
+           "3 ducks")
+           
+str_extract(string1, "\\b[a-z]{1,4}\\b")
+
+```
+
+
+###c.
+```{r eval = TRUE}
+string1 <- c("abcd.txt",
+           "1234.txt",
+           "where are you.txt",
+           "3 keys.txt",
+           "abcd_txt",
+           "1234.txt ")
+           
+str_extract(string1, ".*?\\.txt$")
+
+```
+
+###d.
+```{r eval = TRUE}
+string1 <- c("09/20/2015",
+           "The classes start from 08/29/2015",
+           "0009/20/2015",
+           "09_20_2015",
+           "9/20/2015",
+           "09/2/20150")
+           
+str_extract(string1, "\\d{2}/\\d{2}/\\d{4}")
+```
+
+###d.
+```{r eval = TRUE}
+string1 <- c("<abc>abc</abc>",
+           "<The Story> </The Story>",
+           "<$version></#version>",
+           "</tag>")
+           
+str_extract(string1, "<(.+?)>.+?</\\1>")
+```
+
+### 5. Rewrite the expression [0-9]+\\$ in a way that all the elements are altered but the expression performs the same task.
+
+```{r eval = TRUE}
+library(stringr)
+string1 <- c("190050$",
+           "54$",
+           "1$.25 cents",
+           "abcd$")
+
+str_extract(string1, "[[:digit:]]{1,}\\x24")
+```
+
+
+
+### 6. Consider the mail address chunkylover53[at]aol[dot]com.
+(a) Transform the string to a standard mail format using regular expressions.
+(b) Imagine we are trying to extract the digits in the mail address.  To do so we write
+the expression [:digit:].  Explain why this fails and correct the expression.
+(c) Instead of using the predefined character classes, we would like to use the predefined
+symbols to extract the digits in the mail address.  To do so we write the expression \\D
+Explain why this fails and correct the expression.
+
+### a.
+```{r eval = TRUE}
+formatted_email <- str_replace("chunkylover53[at]aol[dot]com", "\\[at\\]", '@')
+formatted_email <- str_replace(formatted_email, "\\[dot\\]", '.')
+
+
+formatted_email
+```
+
+### b.
+```{r eval = TRUE}
+formatted_email <- str_replace("chunkylover53[at]aol[dot]com", "\\[at\\]", '@')
+formatted_email <- str_replace(formatted_email, "\\[dot\\]", '.')
+
+str_extract(formatted_email, "[:digit:]") # would not extract both the digits
+
+str_extract(formatted_email, "[[:digit:]]+") # would extract both the digits by using + 
+
+
+```
+
+### c
+```{r eval = TRUE}
+str_extract("chunkylover53[at]aol[dot]com", "\\D+") # Gives the letters not digits
+str_extract("chunkylover53[at]aol[dot]com", "\\d+") # Gives the digits, due to can sensitivity.
+```
