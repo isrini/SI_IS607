@@ -1,0 +1,129 @@
+---
+title: "IS607_Project 1"
+author: "Srini Illapani"
+date: "September 20, 2015"
+output: html_document
+---
+***
+
+#### Question:
+
+Use the provided text file with chess tournament results where the information has some structure.
+Your job is to create an R Markdown file that generates a .CSV file (that could for example be imported into a SQL database)
+with the following information for all of the players:
+
+Player's Name, Player's State, Total Number of Points, Player's Pre-Rating, and Average Pre Chess Rating of Opponents
+
+***
+
+1. First, import chess data from the txt file into R:
+
+
+```{r, eval = TRUE, warning=FALSE}
+score_card = readLines("https://raw.githubusercontent.com/isrini/SI_IS607/master/tournamentinfo.txt");
+```
+
+
+
+2. Using the stringr library to extract the data:
+
+```{r, eval = TRUE, warning=FALSE}
+library(stringr);
+library(knitr);
+```
+
+
+3. Thw txt file has two rows of data for each player. Lets extract each row separately and remove the blanks - space and tab:
+
+```{r, eval = TRUE}
+row1 = unlist(str_extract_all(score_card,"^[[:blank:]]+\\d{1,2}.+"))
+row2 = unlist(str_extract_all(score_card,"^[[:blank:]]+[A-Z]{2}.+"))
+head(row1);
+head(row2);
+```
+
+
+4. And extract the chess player name from row 1, the state they represent from row 2 and total points from row 1
+
+```{r, eval = TRUE}
+# names are in upper case
+player_name = unlist(str_extract_all(row1,"(\\b[[:upper:]-]+\\b\\s)+(\\b[[:upper:]-]+\\b){1}"))
+
+# state name is also in upper case
+state_name = unlist(str_extract_all(row2,"[[:upper:]]{2}" ))
+
+# points are decimal numbers
+points = as.numeric(unlist(str_extract_all(row1,"\\d(.)\\d")))                                  
+```
+
+
+5. Now lets extract the pre rating data from row 2:
+
+```{r, eval = TRUE}
+# some of the ratings have a 'P' followedd by additional numbers, we do not need this info, replace it
+pre_rating <- str_replace_all(row2,pattern="[P]\\d{1,}"," ")
+
+# removing the prefix of R: from the pre_rating
+r_colon <- str_extract_all(pre_rating,"([R(:)][[:blank:]]+\\d{3,}+)") 
+
+# the pre rating and converting it to a numeric
+pre_rating <- as.numeric(str_extract_all(r_colon,"\\d{3,}"))          
+
+```
+
+
+6. Lets put all these together in a data frame:
+
+```{r, eval = TRUE}
+score_df <- data.frame(player_name, state_name, points, pre_rating);
+head(score_df);
+```
+
+
+7. Now lets get the opponent player numbers for each of the 64 players from row 1:
+
+```{r, eval = TRUE}
+# each player number has a prefix of W,L or D followed by a space, we do not need this
+player_opponents <- str_extract_all(row1,"[WLD][[:blank:]]+\\d{1,2}") 
+
+Opponents <-str_extract_all(player_opponents,"\\d{1,2}")
+
+# convert the player numbers to numeric
+opponents <- lapply(Opponents, as.numeric)                            
+```
+
+
+8. We need to calculate the average pre chess rating for each player based on their opponents pre_rating numbers. Lets create a function to calculate the
+average rating using their opponents information from above.
+
+```{r, eval = TRUE}
+avg_opp_rate <- function(a){
+  
+  rating <- 0
+  no_of_opponents <- length(a)
+
+  for (i in a){
+    rating <- rating + score_df[i,"pre_rating"]}
+    return(rating / no_of_opponents)
+  }
+
+avg_pre_chess_rating <- unlist(lapply(opponents, avg_opp_rate));
+
+# convert to numeric as well as rounding off the ranking
+avg_pre_chess_rating <- round(avg_pre_chess_rating, 0)
+```
+
+
+9. And bringing it all together now, in to a data frame which includes the required columns to answer the question above.
+
+```{r, eval = TRUE}
+score_df <- data.frame(player_name, state_name, points, pre_rating, avg_pre_chess_rating);
+kable(score_df)
+```
+
+***
+10. Writing the results in to a csv file
+
+```{r, eval = TRUE}
+write.csv(score_df, file ="SI_project1_results.csv")
+```
