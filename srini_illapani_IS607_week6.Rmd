@@ -1,0 +1,98 @@
+---
+title: "IS 607 - Week 6 Assignment"
+author: "Srini Illapani"
+date: "October 1, 2015"
+output: html_document
+---
+
+
+## Load the required packages:
+
+```{r, eval=TRUE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(knitr)
+```
+
+## 1. Read the given flights CSV file into an R object
+
+```{r, eval=TRUE, warning=FALSE}
+# Read the source file from the Github repository
+flights_data <- read.csv("https://raw.githubusercontent.com/isrini/SI_IS607/master/flights_data.csv")
+
+head(flights_data)
+```
+
+## 2.  Do the data wrangling with tidyr and dplyr
+
+
+```{r, eval=TRUE}
+#Add the airline name in the blank rows by selecting the row with airline name and updating the  
+# blank row with the aairline name.
+
+data_row  <- seq(1, 3, by = 2)
+blank_row <- seq(2, 4, by = 2)
+flights_data[blank_row,1] <- flights_data[data_row,1]
+head(flights_data)
+```
+
+
+
+
+```{r, eval=TRUE}
+# Using gather to make city into a variable
+flights_data <- gather(flights_data, "City", "n", 3:7)
+head(flights_data)
+```
+
+
+
+```{r, eval=TRUE}
+## use spread to make 'on-time' and 'delayed' rows into two new distinct columns
+flights_data <- spread(flights_data, X.1, n)
+head(flights_data)
+```
+
+
+
+```{r, eval=TRUE}
+# And finally doing some column name adjustments.
+
+# Name the first column header as 'Airline'
+colnames(flights_data)[1] <- "Airline"
+
+# Replace the space with the hyphen for the column 'on time'
+colnames(flights_data)[4] <- "on_time"
+
+# Replace the . in the city names with a space
+flights_data$City <- gsub("\\."," ",flights_data$City)
+
+```
+
+
+### Here is the transformed Tidy data set
+
+```{r, eval=TRUE}
+kable(flights_data)
+```
+
+## 3. Perform analysis to compare the arrival delays for the two airlines.
+
+```{r, eval=TRUE}
+flights_data %>% 
+  group_by(City, Airline) %>% 
+  summarise(delay_percent = 100 * delayed/(on_time + delayed)) %>% 
+  arrange(City, Airline)
+```
+
+
+### Visual Plotting of the arrival delay rates bewteen the two airlines
+
+
+```{r, eval=TRUE}
+library(ggplot2)
+qplot(City, 100 * delayed/(on_time + delayed), data = flights_data, color = Airline, geom = "boxplot")
+```
+
+
+
