@@ -1,0 +1,200 @@
+---
+title: "IS 607 - Project 2"
+author: "Srini Illapani"
+date: "October 10, 2015"
+output: html_document
+---
+## Wide data set 1 - Source fivethirtyeight  
+The source https://github.com/fivethirtyeight/data/blob/master/forecast-methodology/historical-senate-predictions.csv).
+
+The data depicts the win/loss probability predictions for the years 2008 to 2012 US Senate candidates by state.
+
+
+#### 1. Load the required packages:
+
+```{r, eval=TRUE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+```
+
+#### 2. After downloding the source file from github, read the CSV file into an R object
+
+```{r, eval=TRUE, warning=FALSE}
+senate_pred <- read.csv("https://raw.githubusercontent.com/isrini/SI_IS607/master/historical-senate-predictions.csv")
+glimpse(senate_pred)
+```
+
+
+
+#### 3. Perform data wrangling with tidyr and dplyr packages
+
+The source file has data from the years 2008 to 2012 and does not reflect all the 50 states for each of those years.
+For the purpose of this study, lets filter the records for the year 2012 Senate race.
+
+```{r, eval=TRUE, warning=FALSE}
+senate_2012 <- filter(senate_pred, year == '2012')
+senate_2012 <- select(senate_2012, state, candidate, forecast_prob, result, winflag)
+
+head(senate_2012)
+```
+
+The data set is now in a wide format that would still need some tidying and formatting before we can analyze the final set.
+Renaming the data from the columns 'result' and 'winflag'
+
+```{r, eval=TRUE, warning=FALSE}
+senate_2012$result <- gsub("Win", "Winner", senate_2012$result)
+senate_2012$result <- gsub("Loss", "Loser", senate_2012$result)
+
+senate_2012$winflag <- gsub('1', "win_forecast_prob", senate_2012$winflag)
+senate_2012$winflag <- gsub('0', "loss_forecast_prob", senate_2012$winflag)
+
+head(senate_2012)
+```
+
+Now, spread the column 'result' in to two columns to show the 'loser' and 'winner' by name.  
+
+```{r, eval=TRUE, warning=FALSE}
+senate_2012 <- spread(senate_2012, result, candidate)
+head(senate_2012)
+```
+
+Do the same with the 'winflag' column and show the forecast probability as losss and win probability columns.  
+
+
+```{r, eval=TRUE, warning=FALSE}
+senate_2012 <- spread(senate_2012, winflag, forecast_prob)
+head(senate_2012)
+```
+
+We have the State row occuring twice to show each candidate and the corresponding data. Using the group by
+function and summarise, the two State rows have been merged in to one row. And the NA references removed.
+
+```{r, eval=TRUE, warning=FALSE}
+senate_2012 <- senate_2012 %>%
+      group_by(state) %>%
+      summarise_each(funs(first(.[!is.na(.)])))
+    
+head(senate_2012)
+```
+
+
+### Here is the transformed Tidy data set
+
+```{r, eval=TRUE}
+kable(senate_2012)
+```
+
+### 3. Perform win and loss probability analysis.
+  
+We will filter for those with less than 100% win or loss accuracy prediction, to analyze the others who were not 
+in an one sided race.
+
+```{r, eval=TRUE}
+senate_2012_winners <- select(senate_2012, state, Winner, win_forecast_prob)
+
+senate_2012_winners %>%
+  mutate(win_accuracy = win_forecast_prob * 100 ) %>%
+  filter(win_accuracy < 100) %>%
+  select(state, Winner, win_accuracy)
+```
+
+
+```{r, eval=TRUE}
+senate_2012_losers <- select(senate_2012, state, Loser, loss_forecast_prob)
+
+senate_2012_losers %>%
+  mutate(loss_accuracy = loss_forecast_prob * 100 ) %>%
+  filter(loss_accuracy < 100) %>%
+  select(state, Loser, loss_accuracy)
+```
+
+### 4. Visual Plotting of the winning and losing predictions
+
+
+```{r, eval=TRUE}
+library(ggplot2)
+qplot(win_forecast_prob, data = senate_2012_winners, geom = "dotplot")
+```
+
+Almost all the win predictions came true except for one senate race, the single dot to the left. This candidate
+won the race even though the prediction was very low probability for win. 
+
+```{r, eval=TRUE}
+library(ggplot2)
+qplot(loss_forecast_prob, data = senate_2012_losers, geom = "dotplot")
+```
+
+This is a similar plot with the reverse view of the win_prediction probability for the senate race losers. The one senate
+race that we saw above is also shown here as a wrong prediction. The person who was predicted to win lost and the single dot 
+to the right represents that.  
+
+Overall, This is a high quality predictive analysis by FiveThirtyEight.com based on the poll data from various polling sources
+and other indicators or variables.  
+
+
+***  
+## Wide data set 2 (PanTHERIA - Suggested By Veneranda Skrelja )  
+
+Jones, K.E., et al. PanTHERIA: a species-level database of life history, ecology, and geography of extant and recently 
+extinct mammals. Ecology 90:2648. http://esapubs.org/archive/ecol/E090/184/
+
+```{r, eval=TRUE}
+pantheria <-  "http://esapubs.org/archive/ecol/E090/184/PanTHERIA_1-0_WR05_Aug2008.txt"
+download.file(pantheria, destfile = "mammals.txt")
+```
+
+```{r, eval=TRUE}
+
+# Read the data from the downloaded txt file in to a data set called 'mammals'
+mammals <- read.table("mammals.txt", sep = "\t", header = TRUE,  stringsAsFactors = FALSE)
+
+# Tidy the column names
+names(mammals) <- sub("X[0-9._]+", "", names(mammals))
+names(mammals) <- sub("MSW05_", "", names(mammals))
+
+# Select the columns names to be used for further transformation
+mammals <- dplyr::select(mammals, Order, Binomial, AdultBodyMass_g, AdultHeadBodyLen_mm, HomeRange_km2, LitterSize)
+head(mammals)
+
+# Renaming the column names to lower case and adding '_' in between words and other formatting
+names(mammals) <- gsub("([A-Z])", "_\\L\\1", names(mammals), perl = TRUE)
+names(mammals) <- gsub("^_", "", names(mammals), perl = TRUE)
+mammals[mammals == -999] <- NA
+names(mammals)[names(mammals) == "binomial"] <- "species"
+
+head(mammals)
+```
+
+### 1. Data manipulation
+
+```{r, eval=TRUE}
+# Mutate - to add new columns using current data
+head(mutate(mammals, adult_body_mass_kg = adult_body_mass_g / 1000))
+
+# Summarising data by grouping
+head(summarise(group_by(mammals, order),
+  mean_mass = mean(adult_body_mass_g, na.rm = TRUE)))
+
+# Piping data
+piping = mammals %>%
+    mutate(mass_to_length = adult_body_mass_g / adult_head_body_len_mm) %>%
+    arrange(desc(mass_to_length)) %>%
+    select(species, mass_to_length, litter_size)
+
+head(piping)
+```
+
+### 2. Data Analysis
+
+```{r, eval=TRUE}
+# Using group by and summarise to find the mean litter_size by species
+mean = group_by(mammals,species) %>% 
+    filter(litter_size != 'NA') %>% 
+    summarise(mean(litter_size))
+
+head(mean)
+```
+
+
