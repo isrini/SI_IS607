@@ -6,19 +6,22 @@
                 "id":"01",
                 "title": "Practical Data Science with R",
                 "edition": "first",
-                "author": ["Nina Zumel", "John Mount"]
+                "author": [
+                	"Nina Zumel",
+                	"John Mount"
+                	]
             },
             {
                 "id":"02",
                 "title": "The Art of R Programming: A Tour of Statistical Software Design",
                 "edition": "first",
-                "author": ["Norman Matloff"]
+                "author": "Norman Matloff"
             },
 	  	    {
                 "id":"03",
                 "title": "Advanced R - Chapman and Hall/CRC The R Series",
                 "edition": "first",
-                "author": ["Hadley Wickham"]
+                "author": "Hadley Wickham"
             }
         ]
     }
