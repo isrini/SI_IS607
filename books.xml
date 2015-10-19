@@ -4,7 +4,8 @@
 		<id>01</id>
 		<title>Practical Data Science with R</title>
 		<edition>first</edition>
-		<author>Nina Zumel and John Mount</author>
+		<author>Nina Zumel</author>
+		<author>John Mount</author>
 	</book>
 	<book>
 		<id>02</id>
