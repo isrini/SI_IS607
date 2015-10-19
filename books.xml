@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<amazon>
+	<book>
+		<id>01</id>
+		<title>Practical Data Science with R</title>
+		<edition>first</edition>
+		<author>Nina Zumel and John Mount</author>
+	</book>
+	<book>
+		<id>02</id>
+		<title>The Art of R Programming: A Tour of Statistical Software Design</title>
+		<edition>first</edition>
+		<author>Norman Matloff</author>
+	</book>
+	<book>
+		<id>03</id>
+		<title>Advanced R - Chapman and Hall/CRC The R Series </title>
+		<edition>first</edition>
+		<author>Hadley Wickham</author>
+	</book>
+</amazon>
