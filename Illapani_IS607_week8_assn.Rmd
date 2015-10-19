@@ -1,0 +1,89 @@
+---
+title: "Working with XML and JSON in R"
+author: "Srini Illapani"
+date: "October 18, 2015"
+output: html_document
+---
+
+## 1. Loading and parsing XML file
+
+1. Loading required packages
+
+```{r, eval=TRUE}
+library(XML)
+library(RCurl)
+```
+
+2. XML package does not support https. So we will get the file from the secured site
+using RCurl first and then use xmlTreeParse(). 
+
+```{r, eval=TRUE}
+# xml file url
+xml_file = getURL("https://raw.githubusercontent.com/isrini/SI_IS607/master/books.xml")
+
+# parse html content
+xml_file2 = xmlTreeParse(xml_file)
+class(xml_file2)
+
+head(xml_file2)
+
+```
+
+
+## 2. Loading and parsing HTML file
+
+1. Loading required packages
+
+```{r, eval=FALSE}
+library(XML)
+library(RCurl)
+```
+
+2. XML package does not support https. So we will get the file from the secured site
+using RCurl first and then use htmlTreeParse().  
+
+```{r, eval=TRUE}
+# html file url
+html_file = getURL("https://raw.githubusercontent.com/isrini/SI_IS607/master/books.html")
+
+# parse html content
+html_file2 = htmlTreeParse(html_file)
+class(html_file2)
+
+head(html_file2)
+
+```
+
+
+
+## 3. Loading and parsing JSON file
+
+1. Loading required packages
+
+```{r, eval=TRUE}
+library(RJSONIO)
+```
+
+2. Get the file from the secured site using RCurl first and then use fromJSON().  
+
+```{r, eval=TRUE}
+# html file url
+json_file = getURL("https://raw.githubusercontent.com/isrini/SI_IS607/master/books.json")
+
+# fromJSON() in package RJSONIO
+json_file2 = RJSONIO::fromJSON(json_file)
+
+# class
+class(json_file2)
+
+head(json_file2)
+```
+
+
+## Conclusion:
+
+#### Based on the outputs from the three data frames as seen above, the data frames are not identical.  
+  
+  
+
+
