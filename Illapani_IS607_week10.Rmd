@@ -1,0 +1,54 @@
+---
+title: "Week 10: Web API's"
+author: "Srini Illapani"
+date: "October 30, 2015"
+output:
+  html_document: 
+    highlight: default
+    number_sections: yes
+    toc: yes
+---
+
+#Task  
+
+Choose one of the New York Times APIs, construct an interface in R to read in the JSON data,
+and transform it to an R dataframe.  
+
+#Packages  
+
+Loading required packages  
+
+```{r, eval=TRUE}
+library(RJSONIO)
+```
+
+
+#Data Source  
+
+We are bringing in the data by calling the specific API for The Campaign Finance hosted by The New York Times developer network
+
+![NYT](campaign_fin.png)
+
+
+#Data sourcing, parsing and reading  
+
+Using the R package to read and parse JSON format files.
+```{r, eval=TRUE}
+# The source url is a combination of the base uri + the site key obtained from the provider for calling
+# this sepcific API.
+
+# We are using the variables for year and the name of the candidate. In this case, it is 2008 for Obama.
+
+url <- "http://api.nytimes.com/svc/elections/us/v3/finances/2008/president/candidates/obama.json?
+api-key=d567ecd7d91346b9a698db4e245dac5b:9:73349057"
+
+# reading the json in to a dataframe
+df <- fromJSON(url, simplifyDataFrame = TRUE)
+
+# parsing and displaying the camapign data 
+head(df)
+```
+
+
+
+
