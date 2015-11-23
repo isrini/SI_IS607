@@ -1,0 +1,110 @@
+---
+title: "Illapani_wk11"
+author: "Srini Illapani"
+date: "November 22, 2015"
+output: html_document
+---
+
+## Document Classification
+
+
+
+### Load the two files into R:
+
+The dataset is based on the real data examples of spam emails at - https://archive.ics.uci.edu/ml/datasets/Spambase
+The dataset contains 57 attributes. Each attribute refers to the occurance or frequency of a specific word in the
+spambase email files.  
+
+It also contains attributes which show the number of certain chars in the email like ";", "$", "!" etc.  
+
+And the last attribute denotes whether the email was considered spam (1) or ham (not spam) (0).  
+
+
+```{r, eval=TRUE}
+# Reading the file from my repository into R
+file = "https://raw.githubusercontent.com/isrini/SI_IS607/master/data.csv"
+data <- read.csv(file, header=TRUE, sep="|")
+```
+
+
+
+```{r, eval=TRUE}
+# Make the last column 'y' (spam yes or no) a factor variable for binary classification
+data$y <- as.factor(data$y)
+
+# Sample of 100 rows
+data <- data[sample(nrow(data), 500),]
+colnames(data)
+
+```
+
+
+### Load the library packages
+
+```{r, eval=TRUE}
+library(caret)
+library(rpart)
+library(e1071)
+```
+
+
+
+### Split the data in to two - train and test
+
+```{r, eval=TRUE}
+# split data into a train and test set
+i <- 1:nrow(data)
+trainIndex <- sample(i, trunc(length(i)/4))
+
+data_test <- data[trainIndex,]
+data_train  <- data[-trainIndex,]
+```
+
+
+
+### Create the SVM and rpart model
+
+```{r, eval=TRUE}
+# Both for the SVM and the partitioning tree (via rpart()), we fit the model and try to predict the test set values:
+# create a model using the training data set
+svm.model <- svm(y~., data = data_train)
+rpart.model <- rpart(y~., data = data_train)
+
+```
+
+
+### Evaluate the model for prediction 
+
+```{r, eval=TRUE}
+
+svm.pred <- predict(svm.model,data_test[,-58])
+rpart.pred <- predict(rpart.model,data_test[,-58], type = "class")
+
+
+```
+
+### A cross-tabulation of the true versus the predicted values yields.
+
+```{r, eval=TRUE}
+# compute svm confusion matrix
+svm.cm <- table(pred = svm.pred, true = data_test[,58])
+svm.cm
+
+# compute rpart confusion matrix
+rpart.cm <- table(pred = rpart.pred, true = data_test[,58])
+rpart.cm
+
+# compare the performance of the two methods by computing the respective accuracy rates and the kappa indices
+
+classAgreement(svm.cm)
+classAgreement(rpart.cm)
+
+```
+
+The results are almost same for SVM and rpart models.
+
+
+
+
+
+
